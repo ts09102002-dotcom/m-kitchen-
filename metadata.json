@@ -1,0 +1,6 @@
+{
+  "name": "Maharaji Kitchen",
+  "description": "A luxury-grade QR-code-based Restaurant Management System with Customer, Reception, and Admin interfaces, live tracking, real-time print-ready invoice generation, and digital kitchen operations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

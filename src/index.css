@@ -1,0 +1,182 @@
+@import "tailwindcss";
+
+@theme {
+  --color-maroon-deep: #5C0F1A;
+  --color-maroon-royal: #7B1E2B;
+  --color-maroon-light: #A03546;
+  --color-gold-rich: #D4AF37;
+  --color-gold-light: #E8C766;
+  --color-gold-shimmer: #F5DC8A;
+  --color-cream-ivory: #FAF7F2;
+  --color-cream-warm: #F2EBDF;
+  --color-charcoal-deep: #1C1917;
+  --color-charcoal-soft: #2D2A26;
+  --color-espresso: #2D1810;
+  --color-mocha: #5C4033;
+  --color-success: #059669;
+  --color-danger: #DC2626;
+  --color-warning: #F59E0B;
+  --color-info: #3B82F6;
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-accent: "Cormorant+Garamond", Georgia, serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4AF37;
+  border-radius: 9999px;
+  opacity: 0.6;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #E8C766;
+}
+
+/* Choice Selection Color */
+::selection {
+  background-color: #7B1E2B;
+  color: #FAF7F2;
+}
+
+/* Premium Gradient Presets */
+.bg-royal-gradient {
+  background: linear-gradient(135deg, #7B1E2B 0%, #5C0F1A 100%);
+}
+
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #D4AF37 0%, #F5DC8A 50%, #D4AF37 100%);
+}
+
+.bg-luxury-dark {
+  background: linear-gradient(135deg, #1C1917 0%, #2D2A26 100%);
+}
+
+.bg-cream-soft {
+  background: linear-gradient(180deg, #FAF7F2 0%, #F2EBDF 100%);
+}
+
+/* Floating Animation for Crown */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-crown-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Premium Restaurant style logo float with subtle breathing and 3D angle-sway */
+@keyframes premiumLogoFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.25));
+  }
+  50% {
+    transform: translateY(-5px) rotate(1.5deg) scale(1.02);
+    filter: drop-shadow(0 12px 24px rgba(212, 175, 55, 0.35));
+  }
+}
+
+.animate-logo-premium {
+  animation: premiumLogoFloat 4.2s ease-in-out infinite;
+}
+
+/* Bell Shake Animation */
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(10deg); }
+  30% { transform: rotate(-10deg); }
+  45% { transform: rotate(5deg); }
+  60% { transform: rotate(-5deg); }
+  75% { transform: rotate(2deg); }
+}
+
+.animate-bell-shake {
+  animation: shake 1.2s ease-in-out infinite;
+}
+
+/* Continuous Blinking Amber Pulsing for Pending items */
+@keyframes blinkAmber {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(245, 158, 11, 0.2);
+    border-color: rgba(245, 158, 11, 0.4);
+    background-color: rgba(245, 158, 11, 0.02);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.7);
+    border-color: rgba(245, 158, 11, 0.9);
+    background-color: rgba(245, 158, 11, 0.06);
+  }
+}
+
+.animate-pending-blink {
+  animation: blinkAmber 1.8s infinite ease-in-out;
+}
+
+/* Rotating Glow around Coupon Banners */
+@keyframes rotatingGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gold-glow {
+  background-size: 200% 200%;
+  animation: rotatingGlow 4s linear infinite;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+/* Shimmer sweeping animation */
+@keyframes shimmerSweep {
+  0% {
+    transform: translateX(-150%);
+  }
+  50% {
+    transform: translateX(150%);
+  }
+  100% {
+    transform: translateX(150%);
+  }
+}
+
+.animate-shimmer-sweep {
+  animation: shimmerSweep 3.5s infinite ease-in-out;
+}
+
+/* Soft breathing audio indicator for voice mic */
+@keyframes breathing {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(123, 30, 43, 0.4);
+  }
+  50% {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 12px rgba(123, 30, 43, 0);
+  }
+}
+
+.animate-mic-active {
+  animation: breathing 1.5s infinite ease-in-out;
+}
