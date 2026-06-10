@@ -8,6 +8,7 @@ export enum TableStatus {
 export enum OrderItemStatus {
   CONFIRMED = "confirmed",
   PENDING_APPROVAL = "pending_approval",
+  REJECTED = "rejected",
 }
 
 export enum UserRole {

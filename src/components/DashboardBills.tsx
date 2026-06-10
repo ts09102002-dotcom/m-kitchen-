@@ -8,6 +8,7 @@ export const DashboardBills: React.FC = () => {
   // Zustand States
   const bills = useStore(state => state.bills);
   const billEditsLog = useStore(state => state.billEditsLog);
+  const orderItems = useStore(state => state.orderItems);
   const menuItems = useStore(state => state.menuItems);
   const system = useStore(state => state.system);
   const posWidth = useStore(state => state.posWidth);
@@ -24,7 +25,7 @@ export const DashboardBills: React.FC = () => {
   const activeBillEdits = billEditsLog.filter(log => log.bill_id === selectedBillId);
 
   // Re-usable High-Fidelity PDF Past Invoice download
-  const handleDownloadPastPDF = (billNo: string, tableNum: number, subtotal: number, disc: number, total: number) => {
+  const handleDownloadPastPDF = (bill: typeof bills[0]) => {
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "mm",
@@ -52,39 +53,67 @@ export const DashboardBills: React.FC = () => {
 
     // Meta
     doc.setFontSize(6.5);
-    doc.text(`Table No: ${tableNum}`, 5, 24);
-    doc.text(`Invoice: ${billNo}`, 5, 28);
-    doc.text(`Date: ${new Date().toLocaleDateString("en-IN")}`, width - 20, 24);
+    doc.text(`Table No: ${bill.table_number}`, 5, 24);
+    doc.text(`Invoice: ${bill.bill_number}`, 5, 28);
+    doc.text(`Date: ${bill.closed_at ? new Date(bill.closed_at).toLocaleDateString("en-IN") : "N/A"}`, width - 20, 24);
     doc.text("Type: Settlement Paid", width - 20, 28);
 
-    doc.line(4, 28, width - 4, 28);
+    doc.line(4, 31, width - 4, 31);
 
+    // Items Column Titles
     doc.setFont("Helvetica", "bold");
-    doc.text("STATEMENT DESCRIPTION", 5, 32);
-    doc.text("AMOUNT", width - 8, 32, { align: "right" });
-    doc.line(4, 34, width - 4, 34);
+    doc.text("ITEM", 5, 35);
+    doc.text("QTY", width - 20, 35);
+    doc.text("AMOUNT", width - 8, 35, { align: "right" });
+    doc.line(4, 37, width - 4, 37);
 
     doc.setFont("Helvetica", "normal");
-    doc.text("Dine-In Royal Banquet Course", 5, 39);
-    doc.text(`₹${subtotal.toFixed(0)}`, width - 8, 39, { align: "right" });
+    let y = 41;
 
-    if (disc > 0) {
-      doc.text("Promo Discount Coupon:", 5, 44);
-      doc.text(`-₹${disc.toFixed(0)}`, width - 8, 44, { align: "right" });
+    // Write itemized breakdown
+    if (bill.order_id) {
+      const billItemList = orderItems.filter(oi => oi.order_id === bill.order_id && oi.status === "confirmed");
+      billItemList.forEach(oi => {
+        const mi = menuItems.find(m => m.id === oi.menu_item_id);
+        const name = mi?.name.slice(0, 16) || "Item";
+        doc.text(name, 5, y);
+        doc.text(String(oi.quantity), width - 19, y);
+        doc.text(`₹${(oi.price * oi.quantity).toFixed(0)}`, width - 8, y, { align: "right" });
+        y += 5;
+      });
+    } else {
+      doc.text("Dine-In Royal Banquet Course", 5, y);
+      doc.text(`₹${bill.subtotal.toFixed(0)}`, width - 8, y, { align: "right" });
+      y += 5;
     }
 
-    doc.line(4, 48, width - 4, 48);
+    doc.line(4, y, width - 4, y);
+    y += 4;
+
+    doc.text("Subtotal:", 5, y);
+    doc.text(`₹${bill.subtotal.toFixed(2)}`, width - 8, y, { align: "right" });
+
+    if (bill.discount > 0) {
+      y += 5;
+      doc.text(`Discount (${bill.coupon_code}):`, 5, y);
+      doc.text(`-₹${bill.discount.toFixed(2)}`, width - 8, y, { align: "right" });
+    }
+
+    y += 5;
+    doc.line(4, y, width - 4, y);
+    y += 4;
 
     doc.setFont("Helvetica", "bold");
-    doc.text("GRAND SETTLED TOTAL:", 5, 53);
+    doc.text("GRAND SETTLED TOTAL:", 5, y);
     doc.setFontSize(8.5);
-    doc.text(`₹${total.toFixed(2)}`, width - 8, 53, { align: "right" });
+    doc.text(`₹${bill.total.toFixed(2)}`, width - 8, y, { align: "right" });
 
+    y += 7;
     doc.setFontSize(6.5);
     doc.setFont("Helvetica", "italic");
-    doc.text("System Invoice Closed", width / 2, 60, { align: "center" });
+    doc.text("System Invoice Closed", width / 2, y, { align: "center" });
 
-    doc.save(`maharaji-past-invoice-${billNo}.pdf`);
+    doc.save(`maharaji-past-invoice-${bill.bill_number}.pdf`);
   };
 
   return (
@@ -140,6 +169,17 @@ export const DashboardBills: React.FC = () => {
                   </div>
 
                   <div className="space-y-1 text-xs">
+                    {bill.order_id && (() => {
+                      const billItems = orderItems.filter(oi => oi.order_id === bill.order_id && oi.status === "confirmed");
+                      return billItems.length > 0 ? (
+                        <div className="text-[10px] text-mocha italic mb-1 truncate">
+                          {billItems.map(oi => {
+                            const mi = menuItems.find(m => m.id === oi.menu_item_id);
+                            return `${oi.quantity}x ${mi?.name || "Item"}`;
+                          }).join(", ")}
+                        </div>
+                      ) : null;
+                    })()}
                     <div className="flex justify-between">
                       <span className="text-mocha">Subtotal:</span>
                       <span className="font-mono text-espresso font-medium">₹{bill.subtotal.toFixed(2)}</span>
@@ -162,7 +202,7 @@ export const DashboardBills: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className="p-1 px-3 text-[10px] uppercase font-bold flex items-center justify-center gap-1 border-gold-rich/20 text-mocha hover:text-maroon-royal"
-                    onClick={() => handleDownloadPastPDF(bill.bill_number, bill.table_number, bill.subtotal, bill.discount, bill.total)}
+                    onClick={() => handleDownloadPastPDF(bill)}
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Invoices</span>
@@ -200,6 +240,28 @@ export const DashboardBills: React.FC = () => {
                 Ref No: {activeBill.bill_number}
               </span>
             </div>
+
+            {/* Itemized breakdown */}
+            {activeBill.order_id && (() => {
+              const billItems = orderItems.filter(oi => oi.order_id === activeBill.order_id && oi.status === "confirmed");
+              if (billItems.length === 0) return null;
+              return (
+                <div className="space-y-1.5 text-xs border-b border-gold-rich/10 pb-4">
+                  <span className="block text-[8px] text-mocha font-bold uppercase tracking-wider mb-2">Items Ordered</span>
+                  <div className="divide-y divide-gold-rich/5">
+                    {billItems.map(oi => {
+                      const mi = menuItems.find(m => m.id === oi.menu_item_id);
+                      return (
+                        <div key={oi.id} className="flex justify-between py-1.5">
+                          <span className="text-espresso">{oi.quantity}x {mi?.name || "Unknown Item"}</span>
+                          <span className="font-mono text-mocha">₹{(oi.price * oi.quantity).toFixed(2)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Bill core data rows */}
             <div className="space-y-1.5 text-xs border-b border-gold-rich/10 pb-4 pr-1">
@@ -260,7 +322,7 @@ export const DashboardBills: React.FC = () => {
                 variant="primary"
                 size="sm"
                 className="text-xs font-bold uppercase"
-                onClick={() => handleDownloadPastPDF(activeBill.bill_number, activeBill.table_number, activeBill.subtotal, activeBill.discount, activeBill.total)}
+                onClick={() => handleDownloadPastPDF(activeBill)}
               >
                 Download Receipt
               </Button>

@@ -522,8 +522,10 @@ export const useStore = create<AppState>((set, get) => {
 
     rejectPendingItem: (itemId) => {
       const targetItem = get().orderItems.find(oi => oi.id === itemId);
-      const updated = get().orderItems.filter(item => item.id !== itemId);
-      
+      const updated = get().orderItems.map(item =>
+        item.id === itemId ? { ...item, status: OrderItemStatus.REJECTED } : item
+      );
+
       set({ orderItems: updated });
       saveToStorage("order_items", updated);
 
@@ -535,6 +537,11 @@ export const useStore = create<AppState>((set, get) => {
     },
 
     updateOrderStatus: (orderId, status) => {
+      const order = get().orders.find(o => o.id === orderId);
+      if (!order) return;
+      const progression: Record<string, string> = { pending: "preparing", preparing: "cooking", cooking: "served", served: "completed" };
+      const expected = progression[order.status];
+      if (expected && status !== expected && status !== "cancelled") return;
       const list = get().orders.map(o => o.id === orderId ? { ...o, status } : o);
       set({ orders: list });
       saveToStorage("orders", list);
@@ -850,7 +857,7 @@ export const useStore = create<AppState>((set, get) => {
         bills: [],
         billEditsLog: [],
         todaysOffers: INITIAL_OFFERS,
-        coupons: [], // Clear all coupons
+        coupons: INITIAL_COUPONS,
         stockPurchases: [],
         auditLogs: preservedLogs,
         currentUser: get().currentUser // Keep Admin logged in!
@@ -866,7 +873,7 @@ export const useStore = create<AppState>((set, get) => {
       saveToStorage("bills", []);
       saveToStorage("bill_edits_log", []);
       saveToStorage("todays_offers", INITIAL_OFFERS);
-      saveToStorage("coupons", []);
+      saveToStorage("coupons", INITIAL_COUPONS);
       saveToStorage("stock_purchases", []);
       saveToStorage("audit_logs", preservedLogs);
       saveToStorage("system", get().system); // Preserve active config

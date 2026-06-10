@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useStore } from "../store";
 import { Card, Button, MaharajiLogo } from "./PremiumUI";
 import { toast } from "sonner";
-import { FileText, TrendingUp, Receipt, Crown, Calendar, Search, Mic, MicOff, Trash2, Download, Printer, ListFilter as Filter, ChevronDown, ChevronUp, Sparkles, Loader as Loader2, Info, ArrowUpRight, ArrowDownLeft, CircleAlert as AlertCircle, RefreshCw, ChartBar as BarChart3, ChartPie as PieIcon, Package, Check, Circle as HelpCircle } from "lucide-react";
+import { FileText, TrendingUp, Receipt, Crown, Calendar, Search, Mic, MicOff, Trash2, Download, Printer, ListFilter as Filter, ChevronDown, ChevronUp, Sparkles, Loader as Loader2, Info, ArrowUpRight, ArrowDownLeft, CircleAlert as AlertCircle, RefreshCw, ChartBar as BarChart3, ChartPie as PieIcon, Package, Check, HelpCircle } from "lucide-react";
 import { 
   ResponsiveContainer, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend 

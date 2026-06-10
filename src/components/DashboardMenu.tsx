@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useStore, generateDescription, getFoodImage } from "../store";
 import { Button, Card, EmptyState, Modal, FormInput } from "./PremiumUI";
 import { toast } from "sonner";
-import { ChefHat, Plus, Trash2, CreditCard as Edit3, Check, Sparkles, Flame, Eye, Badge as BadgeHelp, UtensilsCrossed, Image as ImageIcon, EyeOff, ToggleLeft, ToggleRight } from "lucide-react";
+import { ChefHat, Plus, Trash2, Edit3, Check, Sparkles, Flame, Eye, HelpCircle, UtensilsCrossed, Image as ImageIcon, EyeOff, ToggleLeft, ToggleRight } from "lucide-react";
 
 export const DashboardMenu: React.FC = () => {
   // Zustand States

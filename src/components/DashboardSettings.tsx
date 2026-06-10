@@ -3,7 +3,7 @@ import { useStore } from "../store";
 import { TableStatus, UserRole } from "../types";
 import { Button, Card, FormInput, Modal } from "./PremiumUI";
 import { toast } from "sonner";
-import { Settings, Percent, Trash2, Plus, OctagonAlert as AlertOctagon, Check, FileSliders as Sliders, RefreshCw, Clock as Unlock, Sparkles, Ticket } from "lucide-react";
+import { Settings, Percent, Trash2, Plus, OctagonAlert as AlertOctagon, Check, FileSliders as Sliders, RefreshCw, Sparkles, Ticket } from "lucide-react";
 
 export const DashboardSettings: React.FC = () => {
   // Zustand State

@@ -9,7 +9,7 @@ import {
   VoiceSearchMic, 
   EmptyState 
 } from "./PremiumUI";
-import { ShoppingBag, Plus, Minus, Percent, Check, Clock, ChevronUp, ChevronDown, Lock, Sparkles, Flame, UtensilsCrossed, Beef, Croissant, Candy, Circle as HelpCircle, Search } from "lucide-react";
+import { ShoppingBag, Plus, Minus, Percent, Check, Clock, ChevronUp, ChevronDown, Lock, Sparkles, Flame, UtensilsCrossed, Beef, Croissant, Candy, HelpCircle, Search } from "lucide-react";
 
 // Helper to match category icons accurately
 const getCategoryIcon = (iconName: string) => {
