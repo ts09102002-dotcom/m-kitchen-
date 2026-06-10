@@ -16,6 +16,8 @@ export const DashboardActiveOrders: React.FC = () => {
   const editBillItems = useStore(state => state.editBillItems);
   const editActiveOrderItems = useStore(state => state.editActiveOrderItems);
   const checkoutBill = useStore(state => state.checkoutBill);
+  const approvePendingItem = useStore(state => state.approvePendingItem);
+  const rejectPendingItem = useStore(state => state.rejectPendingItem);
 
   // Active active orders (excluding completed or cancelled)
   const activeOrders = orders.filter(o => o.status !== "completed" && o.status !== "cancelled");
@@ -327,9 +329,10 @@ export const DashboardActiveOrders: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {activeOrders.map(order => {
             const confirmedItems = orderItems.filter(oi => oi.order_id === order.id && oi.status === OrderItemStatus.CONFIRMED);
+            const pendingItems = orderItems.filter(oi => oi.order_id === order.id && oi.status === OrderItemStatus.PENDING_APPROVAL);
             const subtotal = confirmedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-            if (confirmedItems.length === 0) return null;
+            if (confirmedItems.length === 0 && pendingItems.length === 0) return null;
 
             return (
               <Card key={order.id} className="p-5 bg-white border border-gold-rich/15 relative group overflow-hidden">
@@ -358,6 +361,36 @@ export const DashboardActiveOrders: React.FC = () => {
                       </div>
                     );
                   })}
+                  {pendingItems.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-dashed border-gold-rich/15">
+                      <span className="block text-[9px] text-amber-600 font-bold uppercase tracking-wider mb-1">Pending Additions</span>
+                      {pendingItems.map((oi, idx) => {
+                        const dish = menuItems.find(m => m.id === oi.menu_item_id);
+                        return (
+                          <div key={idx} className="flex justify-between items-center text-xs py-1">
+                            <span className="text-amber-700">{oi.quantity}x <span className="font-medium">{dish?.name}</span></span>
+                            <div className="flex items-center gap-1">
+                              <span className="font-mono text-amber-600 mr-2">₹{(oi.price * oi.quantity).toFixed(0)}</span>
+                              <button
+                                onClick={() => approvePendingItem(oi.id)}
+                                className="p-1 rounded bg-green-50 text-green-600 hover:bg-green-100 cursor-pointer"
+                                title="Approve"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => rejectPendingItem(oi.id)}
+                                className="p-1 rounded bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer"
+                                title="Reject"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Financial Summary */}
