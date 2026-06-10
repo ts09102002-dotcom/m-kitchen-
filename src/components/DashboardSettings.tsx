@@ -3,18 +3,7 @@ import { useStore } from "../store";
 import { TableStatus, UserRole } from "../types";
 import { Button, Card, FormInput, Modal } from "./PremiumUI";
 import { toast } from "sonner";
-import { 
-  Settings, 
-  Percent, 
-  Trash2, 
-  Plus, 
-  AlertOctagon, 
-  Check, 
-  Sliders, 
-  RefreshCw, 
-  Unlock,
-  Sparkles
-} from "lucide-react";
+import { Settings, Percent, Trash2, Plus, OctagonAlert as AlertOctagon, Check, FileSliders as Sliders, RefreshCw, Clock as Unlock, Sparkles, Ticket } from "lucide-react";
 
 export const DashboardSettings: React.FC = () => {
   // Zustand State
@@ -210,7 +199,7 @@ export const DashboardSettings: React.FC = () => {
                   </div>
 
                   <span className="block text-[8px] text-gold-rich font-bold uppercase tracking-wider text-right border-t border-dashed border-gold-rich/10 pt-1.5 mt-2">
-                    🎟️ active coupon ticker
+                    <Ticket className="w-3 h-3 inline" /> active coupon ticker
                   </span>
                 </Card>
               ))}
@@ -323,7 +312,7 @@ export const DashboardSettings: React.FC = () => {
       >
         <div className="space-y-4">
           <div className="p-3.5 bg-red-100/30 text-red-950 font-medium text-xs rounded-xl border border-red-200">
-            ⚠ Warning: Performing this override completely wipes table indices, live orders queue, recipes, and invoices.
+            Warning: Performing this override completely wipes table indices, live orders queue, recipes, and invoices.
           </div>
 
           <FormInput

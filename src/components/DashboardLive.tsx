@@ -2,21 +2,7 @@ import React from "react";
 import { useStore } from "../store";
 import { OrderItemStatus, TableStatus } from "../types";
 import { Button, Card, EmptyState } from "./PremiumUI";
-import { 
-  Plus, 
-  ShoppingBag, 
-  Check, 
-  X, 
-  BellRing, 
-  Utensils, 
-  IndianRupee, 
-  Grid, 
-  Clock, 
-  Flame, 
-  ShieldCheck,
-  TrendingUp,
-  FileSpreadsheet
-} from "lucide-react";
+import { Plus, ShoppingBag, Check, X, BellRing, Utensils, IndianRupee, Grid2x2 as Grid, Clock, Flame, ShieldCheck, TrendingUp, FileSpreadsheet, Sparkles } from "lucide-react";
 
 export const DashboardLive: React.FC = () => {
   const setActiveTab = useStore(state => state.setActiveTab);
@@ -160,7 +146,7 @@ export const DashboardLive: React.FC = () => {
                         order.status === "preparing" ? "bg-maroon-light/10 text-maroon-light" :
                         order.status === "cooking" ? "bg-info/10 text-info" : "bg-success/15 text-success"
                       }`}>
-                        {order.status === "pending" ? "🔔 Received" : order.status}
+                        {order.status === "pending" ? "Received" : order.status}
                       </span>
                     </div>
 
@@ -229,7 +215,7 @@ export const DashboardLive: React.FC = () => {
 
           {pendingApprovalsList.length === 0 ? (
             <div className="text-center p-8 bg-white border border-gold-rich/5 rounded-2xl">
-              <span className="block text-xl mb-1.5">✨</span>
+              <span className="block text-xl mb-1.5"><Sparkles className="w-6 h-6 text-gold-rich mx-auto" /></span>
               <h5 className="font-serif text-sm font-bold text-maroon-royal">All Clearance Complete</h5>
               <p className="text-[11px] text-mocha leading-relaxed mt-0.5">
                 No supplemental course additions are awaiting verification. Good to go!

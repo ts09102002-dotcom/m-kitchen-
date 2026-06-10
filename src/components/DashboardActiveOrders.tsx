@@ -3,19 +3,7 @@ import { toast } from "sonner";
 import { useStore } from "../store";
 import { TableStatus, OrderItemStatus } from "../types";
 import { Button, Card, EmptyState, Modal, FormInput } from "./PremiumUI";
-import { 
-  ClipboardList, 
-  Printer, 
-  Download, 
-  CreditCard, 
-  Edit3, 
-  Check, 
-  AlertTriangle, 
-  Trash2, 
-  Sparkles, 
-  ShieldCheck,
-  Percent
-} from "lucide-react";
+import { ClipboardList, Printer, Download, CreditCard, CreditCard as Edit3, Check, TriangleAlert as AlertTriangle, Trash2, Sparkles, ShieldCheck, Percent, Clock } from "lucide-react";
 import jsPDF from "jspdf";
 
 export const DashboardActiveOrders: React.FC = () => {
@@ -26,6 +14,7 @@ export const DashboardActiveOrders: React.FC = () => {
   const system = useStore(state => state.system);
   const posWidth = useStore(state => state.posWidth);
   const editBillItems = useStore(state => state.editBillItems);
+  const editActiveOrderItems = useStore(state => state.editActiveOrderItems);
   const checkoutBill = useStore(state => state.checkoutBill);
 
   // Active active orders (excluding completed or cancelled)
@@ -89,37 +78,15 @@ export const DashboardActiveOrders: React.FC = () => {
 
   const handleSaveBillEdits = () => {
     if (!selectedOrderId) return;
-    
-    // Write out edits
-    // In our simplified store, compiling order details ties directly with checkout subtotal.
-    // Let's call editBillItems of Zustand to update and log changes.
-    // We create a mock bill container first or updates orders directly.
-    // Let's update state and log.
-    const success = editBillItems(selectedOrderId, editableItems, editAdminCode);
-    
-    // For direct reactive updates on active live orders, we replace orderItems list
-    if (success) {
-      useStore.setState(state => {
-        const filteredOut = state.orderItems.filter(oi => oi.order_id !== selectedOrderId || oi.status !== OrderItemStatus.CONFIRMED);
-        const mappedBack = editableItems.map((item, idx) => ({
-          id: `oi-edited-${selectedOrderId}-${idx}-${Date.now()}`,
-          order_id: selectedOrderId,
-          menu_item_id: item.menu_item_id,
-          quantity: item.quantity,
-          price: item.price,
-          status: OrderItemStatus.CONFIRMED,
-          created_at: new Date().toISOString()
-        }));
-        
-        const finalItems = [...filteredOut, ...mappedBack];
-        localStorage.setItem("maharaji_order_items", JSON.stringify(finalItems));
-        return { orderItems: finalItems };
-      });
 
+    const success = editActiveOrderItems(selectedOrderId, editableItems, editAdminCode);
+
+    if (success) {
+      toast.success("Order items updated successfully.");
       setIsEditModalOpen(false);
       setIsEditModeUnlocked(false);
     } else {
-      setEditCodeError("Database error during synchronization.");
+      setEditCodeError("Authorization failed or order not found.");
     }
   };
 
@@ -175,7 +142,7 @@ export const DashboardActiveOrders: React.FC = () => {
 
     doc.setFont("Helvetica", "normal");
     doc.setFontSize(6.5);
-    doc.text("Sukhanibasti, NH31C, West Bengal 73525", width / 2, 16, { align: "center" });
+    doc.text("Sukhanibasti, NH31C, West Bengal 735225", width / 2, 16, { align: "center" });
     doc.text("WhatsApp/Phone: +91 70764 30467", width / 2, 19, { align: "center" });
     
     doc.setLineWidth(0.1);
@@ -264,7 +231,7 @@ export const DashboardActiveOrders: React.FC = () => {
         <body>
           <h3 class="text-center" style="margin:2px 0;">MAHARAJI KITCHEN</h3>
           <p class="text-center" style="font-size:11px; margin:2px 0; font-style: italic;">"${system.tagline}"</p>
-          <p class="text-center" style="font-size:10px; margin:2px 0;">Sukhanibasti, NH31C, West Bengal</p>
+          <p class="text-center" style="font-size:10px; margin:2px 0;">Sukhanibasti, NH31C, West Bengal 735225</p>
           <p class="text-center" style="font-size:10px; margin:2px 0;">WhatsApp: +91 70764 30467</p>
           
           <div class="border-b"></div>
@@ -375,8 +342,8 @@ export const DashboardActiveOrders: React.FC = () => {
                     <span className="block text-[9px] text-mocha font-mono">ID: MK-{order.id.slice(-6).toUpperCase()}</span>
                   </div>
 
-                  <span className="text-[10px] bg-amber-500/10 text-amber-600 border border-amber-500/30 px-2 py-0.5 rounded-lg font-mono font-bold animate-pulse-slow">
-                    ⏳ Dynamic course queue
+                  <span className="text-[10px] bg-amber-500/10 text-amber-600 border border-amber-500/30 px-2 py-0.5 rounded-lg font-mono font-bold animate-pulse-slow flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> Active Course Queue
                   </span>
                 </div>
 
@@ -462,7 +429,7 @@ export const DashboardActiveOrders: React.FC = () => {
         <div className="space-y-4">
           {!isEditModeUnlocked ? (
             <div className="space-y-4">
-              <div className="p-3.5 bg-toast bg-cream-warm/30 rounded-xl border border-gold-rich/10 text-xs text-mocha flex items-start gap-2.5">
+              <div className="p-3.5 bg-cream-warm/30 rounded-xl border border-gold-rich/10 text-xs text-mocha flex items-start gap-2.5">
                 <AlertTriangle className="w-5 h-5 text-gold-rich shrink-0" />
                 <span>Editing confirmed billing elements requires Captain or Admin verification code string to construct audits. Default: <span className="font-bold text-maroon-royal">852</span>.</span>
               </div>
@@ -588,8 +555,8 @@ export const DashboardActiveOrders: React.FC = () => {
                   <span className="block text-[10px] text-danger font-medium pl-1">{settleCouponError}</span>
                 )}
                 {settleDiscount > 0 && (
-                  <span className="block text-[10px] text-success font-semibold pl-1">
-                    ✓ Valid Code! Deducted ₹{settleDiscount.toFixed(2)} on checkout.
+                  <span className="block text-[10px] text-success font-semibold pl-1 flex items-center gap-1">
+                    <Check className="w-3.5 h-3.5" /> Valid Code! Deducted ₹{settleDiscount.toFixed(2)} on checkout.
                   </span>
                 )}
               </div>

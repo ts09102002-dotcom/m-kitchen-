@@ -1,19 +1,8 @@
 import React, { useState } from "react";
 import { useStore, generateDescription, getFoodImage } from "../store";
 import { Button, Card, EmptyState, Modal, FormInput } from "./PremiumUI";
-import { 
-  ChefHat, 
-  Plus, 
-  Trash2, 
-  Edit3, 
-  Check, 
-  Sparkles, 
-  Flame, 
-  Eye, 
-  BadgeHelp,
-  UtensilsCrossed, 
-  Image as ImageIcon 
-} from "lucide-react";
+import { toast } from "sonner";
+import { ChefHat, Plus, Trash2, CreditCard as Edit3, Check, Sparkles, Flame, Eye, Badge as BadgeHelp, UtensilsCrossed, Image as ImageIcon, EyeOff, ToggleLeft, ToggleRight } from "lucide-react";
 
 export const DashboardMenu: React.FC = () => {
   // Zustand States
@@ -44,6 +33,15 @@ export const DashboardMenu: React.FC = () => {
   const [generatedImg, setGeneratedImg] = useState("");
   const [isStepTwoGenerate, setIsStepTwoGenerate] = useState(false);
 
+  // Edit Item Modal State
+  const [isEditItemModalOpen, setIsEditItemModalOpen] = useState(false);
+  const [editItemId, setEditItemId] = useState<string>("");
+  const [editItemName, setEditItemName] = useState("");
+  const [editItemPrice, setEditItemPrice] = useState("");
+  const [editItemDesc, setEditItemDesc] = useState("");
+  const [editItemImg, setEditItemImg] = useState("");
+  const [editItemCategoryId, setEditItemCategoryId] = useState("");
+
   // Handle category saves
   const handleSaveCategory = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +56,7 @@ export const DashboardMenu: React.FC = () => {
   // Step 1: Input name and price for menu items, compile preview
   const handleTriggerGenerator = () => {
     if (!newItemName.trim() || !newItemCategory_id || !newItemPrice) {
-      alert("Please enter Name, Category and Price!");
+      toast.error("Please enter Name, Category and Price!");
       return;
     }
 
@@ -69,6 +67,41 @@ export const DashboardMenu: React.FC = () => {
     setGeneratedDesc(resolvedDesc);
     setGeneratedImg(resolvedImg);
     setIsStepTwoGenerate(true);
+  };
+
+  // Open edit modal for an existing item
+  const handleOpenEditModal = (item: typeof menuItems[0]) => {
+    setEditItemId(item.id);
+    setEditItemName(item.name);
+    setEditItemPrice(item.price.toFixed(2));
+    setEditItemDesc(item.description);
+    setEditItemImg(item.image_url);
+    setEditItemCategoryId(item.category_id);
+    setIsEditItemModalOpen(true);
+  };
+
+  const handleSaveEditItem = () => {
+    const priceVal = parseFloat(editItemPrice);
+    if (!editItemName.trim() || isNaN(priceVal)) {
+      toast.error("Please enter valid name and price!");
+      return;
+    }
+
+    editMenuItem(editItemId, {
+      name: editItemName,
+      price: priceVal,
+      description: editItemDesc,
+      image_url: editItemImg,
+      category_id: editItemCategoryId || undefined
+    });
+
+    toast.success("Menu item updated successfully!");
+    setIsEditItemModalOpen(false);
+  };
+
+  const handleToggleAvailability = (item: typeof menuItems[0]) => {
+    editMenuItem(item.id, { is_available: !item.is_available });
+    toast.success(`${item.name} is now ${item.is_available ? "unavailable" : "available"}`);
   };
 
   // Step 2: Confirm or override generated elements
@@ -154,36 +187,57 @@ export const DashboardMenu: React.FC = () => {
               const matchedCat = categories.find(c => c.id === item.category_id);
               return (
                 <Card key={item.id} className="p-3 bg-white relative flex flex-col justify-between overflow-hidden">
-                  <div className="absolute top-0 inset-x-0 h-1 bg-gold-rich" />
-                  
+                  <div className={`absolute top-0 inset-x-0 h-1 ${item.is_available ? "bg-gold-rich" : "bg-mocha/40"}`} />
+
                   {/* Food visual representation space */}
                   <div className="h-28 rounded-xl bg-cream-warm relative overflow-hidden mb-3.5">
-                    <img 
-                      src={item.image_url} 
-                      alt={item.name} 
-                      className="w-full h-full object-cover"
+                    <img
+                      src={item.image_url}
+                      alt={item.name}
+                      className={`w-full h-full object-cover ${!item.is_available ? "opacity-40 grayscale" : ""}`}
                       referrerPolicy="no-referrer"
                     />
                     <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-charcoal-deep/80 text-white text-[9px] uppercase tracking-wide">
                       {matchedCat?.name || "Dish"}
                     </span>
+                    {!item.is_available && (
+                      <span className="absolute top-2 right-2 px-2 py-0.5 rounded bg-mocha/80 text-cream-ivory text-[8px] uppercase font-bold tracking-wider">
+                        Unavailable
+                      </span>
+                    )}
                   </div>
 
                   <div className="space-y-1.5 flex-1 flex flex-col justify-between">
                     <div>
-                      <h4 className="font-serif text-sm font-bold text-espresso leading-tight">{item.name}</h4>
+                      <h4 className={`font-serif text-sm font-bold leading-tight ${item.is_available ? "text-espresso" : "text-mocha line-through"}`}>{item.name}</h4>
                       <p className="text-[11px] text-mocha line-clamp-2 mt-0.5 leading-relaxed min-h-[32px]">{item.description}</p>
                     </div>
 
                     <div className="flex items-center justify-between pt-2 border-t border-gold-rich/5 mt-2">
                       <span className="font-mono font-bold text-maroon-royal text-sm">₹{item.price.toFixed(2)}</span>
-                      <button
-                        onClick={() => deleteMenuItem(item.id)}
-                        className="p-1 px-1.5 rounded bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer"
-                        title="Delete menu item"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleToggleAvailability(item)}
+                          className={`p-1 px-1.5 rounded cursor-pointer ${item.is_available ? "bg-success/10 text-success hover:bg-success/20" : "bg-mocha/10 text-mocha hover:bg-mocha/20"}`}
+                          title={item.is_available ? "Mark unavailable" : "Mark available"}
+                        >
+                          {item.is_available ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+                        </button>
+                        <button
+                          onClick={() => handleOpenEditModal(item)}
+                          className="p-1 px-1.5 rounded bg-gold-rich/10 text-gold-rich hover:bg-gold-rich/20 cursor-pointer"
+                          title="Edit menu item"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteMenuItem(item.id)}
+                          className="p-1 px-1.5 rounded bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer"
+                          title="Delete menu item"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </Card>
@@ -370,6 +424,73 @@ export const DashboardMenu: React.FC = () => {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* EDIT EXISTING MENU ITEM MODAL */}
+      <Modal
+        isOpen={isEditItemModalOpen}
+        onClose={() => setIsEditItemModalOpen(false)}
+        title="Edit Recipe Item"
+      >
+        <div className="space-y-4">
+          <FormInput
+            label="Dish Name"
+            value={editItemName}
+            onChange={(e) => setEditItemName(e.target.value)}
+            placeholder="eg. Paneer Korma Deluxe"
+            required
+          />
+
+          <div className="relative mb-5 font-sans">
+            <label className="block text-[10px] text-maroon-royal uppercase font-bold tracking-wider mb-1">Cuisine Category</label>
+            <select
+              value={editItemCategoryId}
+              onChange={(e) => setEditItemCategoryId(e.target.value)}
+              className="w-full px-3.5 py-3 text-sm text-espresso bg-white border border-gold-rich/20 rounded-xl focus:outline-none focus:border-gold-rich bg-white"
+            >
+              <option value="">-- Choose Category --</option>
+              {categories.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <FormInput
+            label="Sales Price (₹)"
+            type="number"
+            value={editItemPrice}
+            onChange={(e) => setEditItemPrice(e.target.value)}
+            placeholder="eg. 320"
+            required
+          />
+
+          <div className="relative mb-5 font-sans">
+            <label className="block text-[10px] text-mocha font-bold uppercase tracking-wider mb-1">Gourmet Description</label>
+            <textarea
+              value={editItemDesc}
+              onChange={(e) => setEditItemDesc(e.target.value)}
+              className="w-full p-3 text-xs bg-white border border-gold-rich/20 rounded-xl focus:outline-none focus:border-gold-rich leading-relaxed text-espresso font-medium h-24"
+            />
+          </div>
+
+          <FormInput
+            label="Stock Visual URL"
+            value={editItemImg}
+            onChange={(e) => setEditItemImg(e.target.value)}
+            icon={<ImageIcon className="w-4 h-4" />}
+            placeholder="Image URL"
+          />
+
+          <div className="grid grid-cols-2 gap-2 pt-2">
+            <Button variant="ghost" size="sm" type="button" onClick={() => setIsEditItemModalOpen(false)}>
+              Discard
+            </Button>
+            <Button variant="gold" size="sm" className="font-bold uppercase tracking-wider" onClick={handleSaveEditItem}>
+              <Check className="w-4 h-4 text-charcoal-deep" />
+              <span>Save Changes</span>
+            </Button>
+          </div>
+        </div>
       </Modal>
 
     </div>

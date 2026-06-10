@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
 import { Button, Card, FormInput, VoiceSearchMic } from "./PremiumUI";
+import { toast } from "sonner";
 import { Package, Plus, Trash2, Search, Download, Calendar, ArrowUpRight, TrendingUp } from "lucide-react";
 
 export const DashboardStock: React.FC = () => {
@@ -29,7 +30,7 @@ export const DashboardStock: React.FC = () => {
     const priceVal = parseFloat(unitPrice);
 
     if (!itemName || isNaN(qtyVal) || isNaN(priceVal)) {
-      alert("Please enter Name, Quantity and Unit Price!");
+      toast.error("Please enter Name, Quantity and Unit Price!");
       return;
     }
 
@@ -281,7 +282,7 @@ export const DashboardStock: React.FC = () => {
 
           {filteredStock.length === 0 ? (
             <div className="text-center p-8 bg-white border border-gold-rich/5 rounded-2xl">
-              <span className="text-xl">📦</span>
+              <span className="text-xl"><Package className="w-8 h-8 text-gold-rich/40 mx-auto" /></span>
               <h5 className="font-serif text-sm font-bold text-maroon-royal mt-1">Empty Stock Ledger</h5>
               <p className="text-[10px] text-mocha leading-relaxed mt-0.5">No raw material matches the search keywords.</p>
             </div>

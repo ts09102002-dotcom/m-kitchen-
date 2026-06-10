@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useStore } from "../store";
 import { Button, Card } from "./PremiumUI";
-import { QrCode, Printer, Info, FileImage, Download, Sparkles } from "lucide-react";
+import { toast } from "sonner";
+import { QrCode, Printer, Info, FileImage, Download, Sparkles, Loader as Loader2 } from "lucide-react";
 import QRCode from "qrcode";
+import jsPDF from "jspdf";
 
 export const DashboardQRCodes: React.FC = () => {
   // Zustand State
@@ -269,7 +271,7 @@ export const DashboardQRCodes: React.FC = () => {
     };
 
     logoImg.onerror = () => {
-      alert("Error caching premium chef asset. Please verify internet connection.");
+      toast.error("Error caching premium chef asset. Please verify internet connection.");
     };
   };
 
@@ -460,6 +462,75 @@ export const DashboardQRCodes: React.FC = () => {
     printWin.document.close();
   };
 
+  const handleDownloadAllQRCodes = async () => {
+    try {
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageW = 210;
+      const pageH = 297;
+      let isFirst = true;
+
+      for (let t = 1; t <= 20; t++) {
+        if (!isFirst) pdf.addPage();
+        isFirst = false;
+
+        // Generate QR for this table
+        const destUrl = `${window.location.protocol}//${window.location.host}/menu?table=${t}`;
+        const qrDataUrl = await QRCode.toDataURL(destUrl, { width: 600, margin: 1, color: { dark: "#1C1917", light: "#FFFFFF" } });
+
+        // Background
+        pdf.setFillColor("#FAF7F2");
+        pdf.rect(0, 0, pageW, pageH, "F");
+
+        // Gold border frame
+        pdf.setDrawColor(0xD4, 0xAF, 0x37);
+        pdf.setLineWidth(3);
+        pdf.rect(10, 10, pageW - 20, pageH - 20);
+
+        // Maroon inner frame
+        pdf.setDrawColor(0x7B, 0x1E, 0x2B);
+        pdf.setLineWidth(0.8);
+        pdf.rect(14, 14, pageW - 28, pageH - 28);
+
+        // Title
+        pdf.setFont("Helvetica", "bold");
+        pdf.setFontSize(28);
+        pdf.setTextColor(0x7B, 0x1E, 0x2B);
+        pdf.text("MAHARAJI KITCHEN", pageW / 2, 40, { align: "center" });
+
+        pdf.setFont("Helvetica", "italic");
+        pdf.setFontSize(12);
+        pdf.setTextColor(0x5C, 0x40, 0x33);
+        pdf.text("Royal Taste, Royal Experience", pageW / 2, 50, { align: "center" });
+
+        // QR Code image
+        pdf.addImage(qrDataUrl, "PNG", 35, 60, pageW - 70, pageW - 70);
+
+        // Table plaque
+        pdf.setFillColor(0x7B, 0x1E, 0x2B);
+        pdf.roundedRect(40, pageH - 65, pageW - 80, 35, 4, 4, "F");
+        pdf.setDrawColor(0xD4, 0xAF, 0x37);
+        pdf.setLineWidth(1);
+        pdf.roundedRect(40, pageH - 65, pageW - 80, 35, 4, 4, "S");
+
+        pdf.setFont("Helvetica", "bold");
+        pdf.setFontSize(22);
+        pdf.setTextColor(0xD4, 0xAF, 0x37);
+        pdf.text(`TABLE ${t}`, pageW / 2, pageH - 42, { align: "center" });
+
+        // Instructions
+        pdf.setFont("Helvetica", "bold");
+        pdf.setFontSize(8);
+        pdf.setTextColor(0x5C, 0x40, 0x33);
+        pdf.text("SCAN QR CODE TO BROWSE ROYAL MENU & ORDER DISHES", pageW / 2, pageH - 18, { align: "center" });
+      }
+
+      pdf.save("Maharaji_Kitchen_All_QR_Codes.pdf");
+      toast.success("All 20 QR codes downloaded successfully!");
+    } catch (err) {
+      toast.error("Error generating QR code PDF. Please try again.");
+    }
+  };
+
   return (
     <div className="space-y-6 font-sans select-none">
       
@@ -523,6 +594,15 @@ export const DashboardQRCodes: React.FC = () => {
               >
                 <Printer className="w-4 h-4 text-maroon-royal" />
                 <span>Print Table {selectedTableNum} Standee</span>
+              </Button>
+
+              <Button
+                variant="primary"
+                className="w-full py-3 text-xs uppercase tracking-wider font-bold flex items-center justify-center gap-1.5"
+                onClick={handleDownloadAllQRCodes}
+              >
+                <Download className="w-4 h-4" />
+                <span>Download All 20 QR Codes</span>
               </Button>
             </div>
           </Card>

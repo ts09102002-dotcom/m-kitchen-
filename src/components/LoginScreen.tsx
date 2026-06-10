@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
 import { MaharajiLogo, Button, Card, FormInput } from "./PremiumUI";
-import { KeyRound, User, Lock, Sparkles, LogIn, ChevronLeft } from "lucide-react";
+import { KeyRound, User, Lock, Sparkles, LogIn, ChevronLeft, CircleAlert as AlertCircle } from "lucide-react";
 
 export const LoginScreen: React.FC = () => {
   const login = useStore(state => state.login);
@@ -109,7 +109,7 @@ export const LoginScreen: React.FC = () => {
 
             {error && (
               <div className="p-3.5 bg-danger/10 border border-danger/35 rounded-xl text-xs text-danger font-medium flex items-center gap-2 animate-bounce">
-                <span>⚠️</span>
+                <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{error}</span>
               </div>
             )}

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useStore } from "../store";
 import { Button, Card, EmptyState, Modal } from "./PremiumUI";
-import { FileText, Printer, Download, Eye, Clock, ShieldCheck, History, Search } from "lucide-react";
+import { FileText, Printer, Download, Eye, Clock, ShieldCheck, History, Search, Check } from "lucide-react";
 import jsPDF from "jspdf";
 
 export const DashboardBills: React.FC = () => {
@@ -44,17 +44,18 @@ export const DashboardBills: React.FC = () => {
 
     doc.setFont("Helvetica", "normal");
     doc.setFontSize(6);
-    doc.text("NH31C Sukhanibasti, West Bengal", width / 2, 14, { align: "center" });
-    
+    doc.text("Sukhanibasti, NH31C, West Bengal 735225", width / 2, 14, { align: "center" });
+    doc.text("WhatsApp: +91 70764 30467", width / 2, 17, { align: "center" });
+
     doc.setLineWidth(0.1);
-    doc.line(4, 17, width - 4, 17);
+    doc.line(4, 20, width - 4, 20);
 
     // Meta
     doc.setFontSize(6.5);
-    doc.text(`Table No: ${tableNum}`, 5, 21);
-    doc.text(`Invoice: ${billNo}`, 5, 25);
-    doc.text(`Date: ${new Date().toLocaleDateString("en-IN")}`, width - 20, 21);
-    doc.text("Type: Settlement Paid", width - 20, 25);
+    doc.text(`Table No: ${tableNum}`, 5, 24);
+    doc.text(`Invoice: ${billNo}`, 5, 28);
+    doc.text(`Date: ${new Date().toLocaleDateString("en-IN")}`, width - 20, 24);
+    doc.text("Type: Settlement Paid", width - 20, 28);
 
     doc.line(4, 28, width - 4, 28);
 
@@ -133,8 +134,8 @@ export const DashboardBills: React.FC = () => {
                       <span className="font-mono text-xs font-bold text-maroon-royal block select-all">{bill.bill_number}</span>
                       <span className="text-[9px] text-mocha font-mono">Table {bill.table_number} slot</span>
                     </div>
-                    <span className="text-[9px] uppercase px-2 py-0.5 rounded-lg font-mono font-bold bg-[#059669]/10 text-[#059669]">
-                      ✓ Paid
+                    <span className="text-[9px] uppercase px-2 py-0.5 rounded-lg font-mono font-bold bg-[#059669]/10 text-[#059669] flex items-center gap-1">
+                      <Check className="w-3 h-3" /> Paid
                     </span>
                   </div>
 

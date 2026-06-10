@@ -1,12 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useStore } from "../store";
 import { Card, Button, MaharajiLogo } from "./PremiumUI";
-import { 
-  FileText, TrendingUp, Receipt, Crown, Calendar, Search, Mic, MicOff, Trash2, 
-  Download, Printer, Filter, ChevronDown, ChevronUp, Sparkles, Loader2, Info, 
-  ArrowUpRight, ArrowDownLeft, AlertCircle, RefreshCw, BarChart3, PieChart as PieIcon,
-  Package, Check, HelpCircle
-} from "lucide-react";
+import { toast } from "sonner";
+import { FileText, TrendingUp, Receipt, Crown, Calendar, Search, Mic, MicOff, Trash2, Download, Printer, ListFilter as Filter, ChevronDown, ChevronUp, Sparkles, Loader as Loader2, Info, ArrowUpRight, ArrowDownLeft, CircleAlert as AlertCircle, RefreshCw, ChartBar as BarChart3, ChartPie as PieIcon, Package, Check, Circle as HelpCircle } from "lucide-react";
 import { 
   ResponsiveContainer, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend 
@@ -261,13 +257,25 @@ export const DashboardReports: React.FC = () => {
       resultBills = resultBills.filter(b => b.table_number === parseInt(filterTableNo));
     }
     if (filterItemName.trim()) {
-      // If we seek by dish item, let's map based on total bill price or seed completed orders containing it
-      // Let's matching deterministically by scanning menu IDs or simulating item matches
       const searchLower = filterItemName.toLowerCase();
       resultBills = resultBills.filter(b => {
-        // Table matching factor or menu matching factor
-        const seedVal = createRng(`item-filter-${b.id}-${filterItemName}`)();
-        return seedVal > 0.45 || b.subtotal > 800 && searchLower.includes("paneer");
+        // For real bills with order_id, check actual order items
+        if (b.id && !b.id.startsWith("seed-bill-") && b.order_id) {
+          const matchedItems = storeOrderItems.filter(oi => oi.order_id === b.order_id);
+          return matchedItems.some(oi => {
+            const mItem = storeMenuItems.find(mi => mi.id === oi.menu_item_id);
+            return mItem && mItem.name.toLowerCase().includes(searchLower);
+          });
+        }
+        // For seed bills, use deterministic matching based on bill properties
+        const rng = createRng(`item-filter-${b.id}-${filterItemName}`);
+        const dishesCount = Math.floor(1 + rng() * 4);
+        for (let d = 0; d < dishesCount; d++) {
+          const itemIdx = Math.floor(rng() * storeMenuItems.length);
+          const item = storeMenuItems[itemIdx];
+          if (item && item.name.toLowerCase().includes(searchLower)) return true;
+        }
+        return false;
       });
     }
 
@@ -708,7 +716,7 @@ export const DashboardReports: React.FC = () => {
   const listenVoiceInput = (target: string | null) => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("Voice speech services are not supported on this browser context. Please use Google Chrome.");
+      toast.error("Voice speech services are not supported on this browser. Please use Google Chrome.");
       return;
     }
 
@@ -870,7 +878,7 @@ export const DashboardReports: React.FC = () => {
 
       pdf.save(`MaharajiKitchen_Report_${reportType}_${selectedDate}.pdf`);
     } catch (e) {
-      alert("Error printing high-definition graphics. Generating standard print window.");
+      toast.error("Error printing high-definition graphics. Generating standard print window.");
     } finally {
       setIsExportingPDF(false);
     }
@@ -974,7 +982,7 @@ export const DashboardReports: React.FC = () => {
 
       XLSX.writeFile(wb, `MaharajiKitchen_Report_${reportType}_${selectedDate}.xlsx`);
     } catch (e) {
-      alert("Error building SheetJS workbook.");
+      toast.error("Error building SheetJS workbook.");
     } finally {
       setIsExportingExcel(false);
     }
@@ -996,7 +1004,7 @@ export const DashboardReports: React.FC = () => {
       link.click();
       document.body.removeChild(link);
     } catch (err) {
-      alert("Failed generating flat CSV streams.");
+      toast.error("Failed generating flat CSV streams.");
     } finally {
       setIsExportingCSV(false);
     }

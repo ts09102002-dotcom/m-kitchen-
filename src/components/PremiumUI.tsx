@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, Mic, MicOff, AlertCircle, Sparkles, Loader2, X } from "lucide-react";
+import { Search, Mic, MicOff, CircleAlert as AlertCircle, Sparkles, Loader as Loader2, X } from "lucide-react";
+import { toast } from "sonner";
 
 // ==========================================
 // 1. MAHARAJI LOGO (CUSTOM ANIME SVG CROWN)
@@ -383,7 +384,7 @@ export const VoiceSearchMic: React.FC<VoiceProps> = ({ onResults, placeholder = 
 
   const toggleListen = () => {
     if (!recognitionRef.current) {
-      alert("Voice search is not supported in this browser container. Please use modern Chrome/Edge.");
+      toast.error("Voice search is not supported in this browser. Please use modern Chrome/Edge.");
       return;
     }
 

@@ -207,6 +207,7 @@ interface AppState {
   activeBillByTable: Record<number, Bill | null>;
   validateCoupon: (code: string, totalAmount: number, currentBillId?: string) => { valid: boolean; discountAmount: number; error?: string };
   editBillItems: (billId: string, itemChanges: { menu_item_id: string; quantity: number; price: number }[], adminCode: string) => boolean;
+  editActiveOrderItems: (orderId: string, itemChanges: { menu_item_id: string; quantity: number; price: number }[], adminCode: string) => boolean;
   checkoutBill: (table_number: number, coupon_code?: string) => void;
 
   // Promotional rules
@@ -624,6 +625,36 @@ export const useStore = create<AppState>((set, get) => {
       saveToStorage("bill_edits_log", updatedLogs);
 
       get().logAudit("BILL_EDIT_SUCCESS", `Authorized edit applied on Bill ${targetBill.bill_number}.`);
+      return true;
+    },
+
+    editActiveOrderItems: (orderId, itemChanges, adminCode) => {
+      const activeCode = get().system.receptionAuthCode;
+      if (adminCode !== activeCode) {
+        get().logAudit("ORDER_EDIT_FAILED", `Unauthorized edit attempt on order id ${orderId} (Wrong code).`);
+        return false;
+      }
+
+      const targetOrder = get().orders.find(o => o.id === orderId);
+      if (!targetOrder) return false;
+
+      // Replace confirmed order items with the edited set
+      const otherItems = get().orderItems.filter(oi => oi.order_id !== orderId || oi.status !== OrderItemStatus.CONFIRMED);
+      const newConfirmedItems: OrderItem[] = itemChanges.map((item, idx) => ({
+        id: `oi-edited-${orderId}-${idx}-${Date.now()}`,
+        order_id: orderId,
+        menu_item_id: item.menu_item_id,
+        quantity: item.quantity,
+        price: item.price,
+        status: OrderItemStatus.CONFIRMED,
+        created_at: new Date().toISOString()
+      }));
+
+      const finalItems = [...otherItems, ...newConfirmedItems];
+      set({ orderItems: finalItems });
+      saveToStorage("order_items", finalItems);
+
+      get().logAudit("ORDER_EDIT_SUCCESS", `Authorized edit applied on Order for Table ${targetOrder.table_number}.`);
       return true;
     },
 
