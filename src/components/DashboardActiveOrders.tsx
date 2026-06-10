@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { useStore } from "../store";
 import { TableStatus, OrderItemStatus } from "../types";
 import { Button, Card, EmptyState, Modal, FormInput } from "./PremiumUI";
-import { ClipboardList, Printer, Download, CreditCard, Edit3, Check, AlertTriangle, Trash2, Sparkles, ShieldCheck, Percent, Clock } from "lucide-react";
+import { ClipboardList, Printer, Download, CreditCard, CreditCard as Edit3, Check, TriangleAlert as AlertTriangle, Trash2, Sparkles, ShieldCheck, Percent, Clock } from "lucide-react";
 import jsPDF from "jspdf";
 
 export const DashboardActiveOrders: React.FC = () => {
