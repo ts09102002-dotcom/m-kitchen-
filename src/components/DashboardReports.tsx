@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useStore } from "../store";
 import { Card, Button, MaharajiLogo } from "./PremiumUI";
 import { toast } from "sonner";
-import { FileText, TrendingUp, Receipt, Crown, Calendar, Search, Mic, MicOff, Trash2, Download, Printer, ListFilter as Filter, ChevronDown, ChevronUp, Sparkles, Loader as Loader2, Info, ArrowUpRight, ArrowDownLeft, CircleAlert as AlertCircle, RefreshCw, ChartBar as BarChart3, ChartPie as PieIcon, Package, Check, HelpCircle } from "lucide-react";
+import { FileText, TrendingUp, Receipt, Crown, Calendar, Search, Mic, MicOff, Trash2, Download, Printer, ListFilter as Filter, ChevronDown, ChevronUp, Sparkles, Loader as Loader2, Info, ArrowUpRight, ArrowDownLeft, CircleAlert as AlertCircle, RefreshCw, ChartBar as BarChart3, ChartPie as PieIcon, Package, Check, Circle as HelpCircle } from "lucide-react";
 import { 
   ResponsiveContainer, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend 
@@ -214,10 +214,9 @@ export const DashboardReports: React.FC = () => {
       return inRange && !actualBillDates.has(bDate);
     });
 
-    // If storeBills is empty globally (e.g. system hard reset), show empty array. Otherwise, merge real and seeds beautifully!
-    const finalBills = storeBills.length === 0
-      ? []
-      : [...activeStoreBills, ...filteredSeedBills];
+    // Merge real bills with seed data for demo purposes
+    // Always include activeStoreBills (real checkout bills) + seed bills for dates without real data
+    const finalBills = [...activeStoreBills, ...filteredSeedBills];
 
     // Same logic for stock purchases
     const actualPurchaseDates = new Set(activeStorePurchases.map(p => p.date.slice(0, 10)));

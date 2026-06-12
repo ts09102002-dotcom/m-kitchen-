@@ -24,9 +24,14 @@ export const DashboardLive: React.FC = () => {
   // Sum active pending approvals of items (status = pending_approval)
   const pendingApprovalsList = orderItems.filter(oi => oi.status === OrderItemStatus.PENDING_APPROVAL);
 
-  // Calculate Today's settled bills revenue
-  const todayPrefix = new Date().toISOString().slice(0, 10);
-  const todaysBills = bills.filter(b => b.closed_at?.startsWith(todayPrefix));
+  // Calculate Today's settled bills revenue (using local date for India timezone)
+  const now = new Date();
+  const todayLocal = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const todaysBills = bills.filter(b => {
+    if (!b.closed_at) return false;
+    const billDate = b.closed_at.slice(0, 10);
+    return billDate === todayLocal;
+  });
   const todayRevenue = todaysBills.reduce((acc, b) => acc + b.total, 0);
 
   // Count active occupied tables (status = active)
